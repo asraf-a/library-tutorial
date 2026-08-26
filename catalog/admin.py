@@ -1,17 +1,9 @@
 from django.contrib import admin
 
-from .models import Author, Genre, Book, BookInstance, Language
+from .models import Author, Book, BookInstance, Genre, Language
 
 
-admin.site.register(Genre)
-admin.site.register(Language)
-
-
-class BookInline(admin.TabularInline):
-    model = Book
-    extra = 0
-
-
+@admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = (
         'last_name',
@@ -19,22 +11,12 @@ class AuthorAdmin(admin.ModelAdmin):
         'date_of_birth',
         'date_of_death',
     )
-
     fields = [
         'first_name',
         'last_name',
-        ('date_of_birth', 'date_of_death'),
+        'date_of_birth',
+        'date_of_death',
     ]
-
-    inlines = [BookInline]
-
-
-admin.site.register(Author, AuthorAdmin)
-
-
-class BooksInstanceInline(admin.TabularInline):
-    model = BookInstance
-    extra = 0
 
 
 @admin.register(Book)
@@ -45,7 +27,10 @@ class BookAdmin(admin.ModelAdmin):
         'display_genre',
     )
 
-    inlines = [BooksInstanceInline]
+    list_filter = (
+        'author',
+        'genre',
+    )
 
 
 @admin.register(BookInstance)
@@ -53,6 +38,7 @@ class BookInstanceAdmin(admin.ModelAdmin):
     list_display = (
         'book',
         'status',
+        'borrower',
         'due_back',
         'id',
     )
@@ -63,17 +49,38 @@ class BookInstanceAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        (None, {
-            'fields': (
-                'book',
-                'imprint',
-                'id',
-            ),
-        }),
-        ('Availability', {
-            'fields': (
-                'status',
-                'due_back',
-            ),
-        }),
+        (
+            None,
+            {
+                'fields': (
+                    'book',
+                    'imprint',
+                    'id',
+                )
+            },
+        ),
+        (
+            'Availability',
+            {
+                'fields': (
+                    'status',
+                    'due_back',
+                    'borrower',
+                )
+            },
+        ),
+    )
+
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+    )
+
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
     )
