@@ -2,42 +2,63 @@
 
 {% block content %}
 
-  {% if form.errors %}
-    <p>Your username and password didn't match. Please try again.</p>
-  {% endif %}
+<div class="d-flex justify-content-center align-items-center py-4">
+    <div class="form-card w-100" style="max-width: 460px;">
+        <div class="text-center mb-4">
+            <div class="stat-icon indigo mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 14px;">
+                <i class="bi bi-person-lock"></i>
+            </div>
+            <h1 class="form-card-title mb-1">Welcome Back</h1>
+            <p class="form-card-desc mb-0">Sign in to your LocalLibrary account</p>
+        </div>
 
-  {% if next %}
-    {% if user.is_authenticated %}
-      <p>Your account doesn't have access to this page. To proceed,
-      please login with an account that has access.</p>
-    {% else %}
-      <p>Please login to see this page.</p>
-    {% endif %}
-  {% endif %}
+        {% if form.errors %}
+            <div class="alert-custom alert-danger-custom">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>Your username and password didn't match. Please try again.</span>
+            </div>
+        {% endif %}
 
-  <form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
+        {% if next %}
+            {% if user.is_authenticated %}
+                <div class="alert-custom alert-danger-custom">
+                    <i class="bi bi-shield-x"></i>
+                    <span>Your account doesn't have access to this page. Please log in with an authorized account.</span>
+                </div>
+            {% else %}
+                <div class="alert-custom alert-info-custom">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>Please log in to access this page.</span>
+                </div>
+            {% endif %}
+        {% endif %}
 
-    <table>
-      <tr>
-        <td>{{ form.username.label_tag }}</td>
-        <td>{{ form.username }}</td>
-      </tr>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
 
-      <tr>
-        <td>{{ form.password.label_tag }}</td>
-        <td>{{ form.password }}</td>
-      </tr>
-    </table>
+            <div class="mb-3">
+                <label class="form-label fw-semibold small text-muted" for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+            </div>
 
-    <input type="submit" value="login">
-    <input type="hidden" name="next" value="{{ next }}">
-  </form>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label fw-semibold small text-muted mb-0" for="{{ form.password.id_for_label }}">Password</label>
+                    <a href="{% url 'password_reset' %}" class="small text-primary text-decoration-none">
+                        Lost password?
+                    </a>
+                </div>
+                {{ form.password }}
+            </div>
 
-  <p>
-    <a href="{% url 'password_reset' %}">
-      Lost password?
-    </a>
-  </p>
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <button type="submit" class="btn-primary-custom w-100 mt-3 py-2 justify-content-center">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Sign In</span>
+            </button>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

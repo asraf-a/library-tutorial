@@ -2,26 +2,52 @@
 
 {% block content %}
 
-<h1>Renew: {{ book_instance.book.title }}</h1>
+<div class="page-header-actions mb-4">
+    <div>
+        <a href="{% url 'all-borrowed' %}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Borrowed Books
+        </a>
+        <h1 class="mb-1">Renew Book Loan</h1>
+        <p class="text-muted mb-0">For title: <strong>{{ book_instance.book.title }}</strong></p>
+    </div>
+</div>
 
-<p>
-    Borrower: {{ book_instance.borrower }}
-</p>
+<div class="form-card">
+    <div class="p-3 bg-light rounded-3 border mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="text-muted small d-block">Current Borrower</span>
+                <span class="fw-bold">{{ book_instance.borrower|default:"Unknown" }}</span>
+            </div>
+            <div>
+                <span class="text-muted small d-block">Current Due Date</span>
+                <span class="{% if book_instance.is_overdue %}text-danger fw-bold{% else %}fw-bold text-dark{% endif %}">
+                    {{ book_instance.due_back }}
+                    {% if book_instance.is_overdue %}
+                        (Overdue)
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
 
-<p {% if book_instance.is_overdue %}class="text-danger"{% endif %}>
-    Due date: {{ book_instance.due_back }}
-</p>
+    <form action="" method="post">
+        {% csrf_token %}
 
-<form action="" method="post">
+        <table class="mb-4">
+            {{ form.as_table }}
+        </table>
 
-    {% csrf_token %}
-
-    <table>
-        {{ form.as_table }}
-    </table>
-
-    <input type="submit" value="Submit">
-
-</form>
+        <div class="d-flex align-items-center gap-3">
+            <button type="submit" class="btn-primary-custom">
+                <i class="bi bi-check2"></i>
+                <span>Confirm Renewal</span>
+            </button>
+            <a href="{% url 'all-borrowed' %}" class="btn-secondary-custom">
+                <span>Cancel</span>
+            </a>
+        </div>
+    </form>
+</div>
 
 {% endblock %}

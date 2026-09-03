@@ -2,31 +2,98 @@
 
 {% block content %}
 
-<h1>Borrowed books</h1>
+<div class="page-header-actions">
+    <div>
+        <div class="page-badge">
+            <i class="bi bi-bookmark-check"></i>
+            <span>Personal Loans</span>
+        </div>
+        <h1 class="mt-2 mb-0">My Borrowed Books</h1>
+    </div>
+</div>
 
 {% if bookinstance_list %}
 
-    <ul>
+    <div class="table-card">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bookinst in bookinstance_list %}
+                    <tr class="{% if bookinst.is_overdue %}table-danger-subtle{% endif %}">
+                        <td>
+                            <a href="{% url 'book-detail' bookinst.book.pk %}" class="fw-bold text-decoration-none text-dark d-flex align-items-center gap-2">
+                                <i class="bi bi-book text-primary"></i>
+                                <span>{{ bookinst.book.title }}</span>
+                            </a>
+                            <div class="text-muted small">ID: {{ bookinst.id }}</div>
+                        </td>
+                        <td>
+                            <div class="{% if bookinst.is_overdue %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                {{ bookinst.due_back }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if bookinst.is_overdue %}
+                                <span class="badge-custom badge-overdue">
+                                    <i class="bi bi-exclamation-triangle"></i> Overdue
+                                </span>
+                            {% else %}
+                                <span class="badge-custom badge-status-o">
+                                    <i class="bi bi-clock"></i> Active Loan
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'book-detail' bookinst.book.pk %}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                                <span>View Book</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        {% for bookinst in bookinstance_list %}
-
-            <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-
-                <a href="{% url 'book-detail' bookinst.book.pk %}">
-                    {{ bookinst.book.title }}
+    {% if is_paginated %}
+        <div class="pagination-container">
+            {% if page_obj.has_previous %}
+                <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-chevron-left"></i> Previous
                 </a>
-
-                ({{ bookinst.due_back }})
-
-            </li>
-
-        {% endfor %}
-
-    </ul>
+            {% endif %}
+            <span class="pagination-step">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
 
 {% else %}
 
-    <p>There are no books borrowed.</p>
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <h3 class="empty-state-title">No books currently borrowed</h3>
+        <p class="empty-state-text">
+            You don't have any books checked out right now. Browse the catalog to find your next read!
+        </p>
+        <a href="{% url 'books' %}" class="btn-primary-custom text-decoration-none">
+            <i class="bi bi-search"></i>
+            <span>Browse Books</span>
+        </a>
+    </div>
 
 {% endif %}
 

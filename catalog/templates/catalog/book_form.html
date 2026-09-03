@@ -2,24 +2,50 @@
 
 {% block content %}
 
-<h1>
-    {% if object %}
-        Update Book
-    {% else %}
-        Create Book
-    {% endif %}
-</h1>
+<div class="page-header-actions mb-4">
+    <div>
+        <a href="{% url 'books' %}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Books
+        </a>
+        <h1 class="mb-0">
+            {% if object %}
+                Update Book: {{ object.title }}
+            {% else %}
+                Create New Book
+            {% endif %}
+        </h1>
+    </div>
+</div>
 
-<form action="" method="post">
+<div class="form-card">
+    <div class="form-card-title">
+        <i class="bi bi-journal-plus text-primary me-2"></i>Book Details
+    </div>
+    <p class="form-card-desc">
+        {% if object %}
+            Update existing book bibliographic attributes below.
+        {% else %}
+            Fill in the information below to add a new book to the library collection.
+        {% endif %}
+    </p>
 
-    {% csrf_token %}
+    <form action="" method="post">
+        {% csrf_token %}
 
-    <table>
-        {{ form.as_table }}
-    </table>
+        <table class="mb-4">
+            {{ form.as_table }}
+        </table>
 
-    <input type="submit" value="Submit">
-
-</form>
+        <div class="d-flex align-items-center gap-3">
+            <button type="submit" class="btn-primary-custom">
+                <i class="bi bi-check-lg"></i>
+                <span>{% if object %}Save Changes{% else %}Create Book{% endif %}</span>
+            </button>
+            <a href="{% if object %}{% url 'book-detail' object.id %}{% else %}{% url 'books' %}{% endif %}" class="btn-secondary-custom">
+                <span>Cancel</span>
+            </a>
+        </div>
+    </form>
+</div>
 
 {% endblock %}

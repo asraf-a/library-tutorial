@@ -2,84 +2,107 @@
 
 {% block content %}
 
-<h1>
-    {{ author }}
-</h1>
+<div class="page-header-actions">
+    <div>
+        <a href="{% url 'authors' %}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Authors
+        </a>
+        <h1 class="mb-1">{{ author }}</h1>
+        <div class="text-muted d-flex align-items-center gap-2 mt-1">
+            <i class="bi bi-calendar3"></i>
+            {% if author.date_of_birth or author.date_of_death %}
+                <span>{{ author.date_of_birth|default:"Unknown" }} — {{ author.date_of_death|default:"Present" }}</span>
+            {% else %}
+                <span>Lifespan not recorded</span>
+            {% endif %}
+        </div>
+    </div>
 
-<p>
-    {{ author.date_of_birth }}
+    {% if perms.catalog.change_author or perms.catalog.delete_author %}
+        <div class="d-flex align-items-center gap-2">
+            {% if perms.catalog.change_author %}
+                <a href="{% url 'author-update' author.id %}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-pencil"></i>
+                    <span>Edit Author</span>
+                </a>
+            {% endif %}
 
-    {% if author.date_of_death %}
-        -
-        {{ author.date_of_death }}
+            {% if perms.catalog.delete_author %}
+                <a href="{% url 'author-delete' author.id %}" class="btn-danger-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-trash"></i>
+                    <span>Delete Author</span>
+                </a>
+            {% endif %}
+        </div>
     {% endif %}
-</p>
+</div>
 
-<div style="margin-left:20px;margin-top:20px">
+<!-- Books by Author Section -->
+<div class="content-card mt-4">
+    <div class="content-card-header">
+        <h3 class="content-card-title">
+            <i class="bi bi-journals text-primary me-2"></i>Published Books by {{ author }}
+        </h3>
+        <span class="badge bg-light text-dark border">
+            {{ author.book_set.all.count }} Book{{ author.book_set.all.count|pluralize }}
+        </span>
+    </div>
 
-    <h4>
-        Books by author:
-    </h4>
-
-    {% for book in author.book_set.all %}
-
-        <hr>
-
-        <p>
-            <a href="{{ book.get_absolute_url }}">
-                {{ book.title }}
-            </a>
-        </p>
-
-        <p>
-            {{ book.summary }}
-        </p>
-
-    {% empty %}
-
-        <p>
-            No books by this author.
-        </p>
-
-    {% endfor %}
-
+    {% if author.book_set.all %}
+        <div class="row g-3">
+            {% for book in author.book_set.all %}
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <a href="{{ book.get_absolute_url }}" class="fw-bold text-decoration-none text-dark fs-6 d-block mb-1">
+                                {{ book.title }}
+                            </a>
+                            <p class="text-muted small mb-3" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                                {{ book.summary|default:"No summary available." }}
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{{ book.get_absolute_url }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                                <span>View Book</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state py-4 border-0">
+            <p class="text-muted mb-0">No books recorded for this author.</p>
+        </div>
+    {% endif %}
 </div>
 
 {% endblock %}
 
-
 {% block sidebar %}
-
     {{ block.super }}
 
     {% if perms.catalog.change_author or perms.catalog.delete_author %}
-
-        <hr>
-
+        <div class="sidebar-section-title">Manage This Author</div>
         <ul class="sidebar-nav">
-
             {% if perms.catalog.change_author %}
-
                 <li>
                     <a href="{% url 'author-update' author.id %}">
-                        Update author
+                        <i class="bi bi-person-gear"></i>
+                        <span>Update author</span>
                     </a>
                 </li>
-
             {% endif %}
 
             {% if perms.catalog.delete_author %}
-
                 <li>
                     <a href="{% url 'author-delete' author.id %}">
-                        Delete author
+                        <i class="bi bi-trash3 text-danger"></i>
+                        <span class="text-danger">Delete author</span>
                     </a>
                 </li>
-
             {% endif %}
-
         </ul>
-
     {% endif %}
-
 {% endblock %}

@@ -2,48 +2,66 @@
 
 {% block content %}
 
-<h1>Delete Author: {{ author }}</h1>
+<div class="page-header-actions mb-4">
+    <div>
+        <a href="{% url 'author-detail' author.id %}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Author
+        </a>
+        <h1 class="mb-0 text-danger">Delete Author: {{ author }}</h1>
+    </div>
+</div>
 
-{% if author.book_set.all %}
+<div class="form-card" style="border-color:#fecaca;">
+    {% if author.book_set.all %}
+        <div class="alert-custom alert-danger-custom">
+            <i class="bi bi-shield-slash fs-4"></i>
+            <div>
+                <strong>Deletion Blocked:</strong> You cannot delete this author until all of their books have been deleted from the catalog.
+            </div>
+        </div>
 
-    <p>
-        You can't delete this author until all their books
-        have been deleted:
-    </p>
+        <h5 class="fw-bold mb-3">Associated Books ({{ author.book_set.all.count }}):</h5>
+        <div class="d-flex flex-column gap-2 mb-4">
+            {% for book in author.book_set.all %}
+                <div class="p-2 px-3 rounded bg-light border d-flex justify-content-between align-items-center">
+                    <a href="{% url 'book-detail' book.pk %}" class="fw-semibold text-decoration-none text-dark">
+                        {{ book }}
+                    </a>
+                    <span class="badge bg-secondary">
+                        {{ book.bookinstance_set.all.count }} cop{{ book.bookinstance_set.all.count|pluralize:"y,ies" }}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
 
-    <ul>
+        <div>
+            <a href="{% url 'author-detail' author.id %}" class="btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i>
+                <span>Return to Author Profile</span>
+            </a>
+        </div>
 
-        {% for book in author.book_set.all %}
+    {% else %}
+        <div class="alert-custom alert-danger-custom">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            <div>
+                <strong>Warning:</strong> Are you sure you want to permanently delete author <strong>"{{ author }}"</strong>? This cannot be undone.
+            </div>
+        </div>
 
-            <li>
-                <a href="{% url 'book-detail' book.pk %}">
-                    {{ book }}
+        <form action="" method="POST" class="mt-4">
+            {% csrf_token %}
+            <div class="d-flex align-items-center gap-3">
+                <button type="submit" class="btn-danger-custom">
+                    <i class="bi bi-trash3-fill"></i>
+                    <span>Yes, delete.</span>
+                </button>
+                <a href="{% url 'author-detail' author.id %}" class="btn-secondary-custom">
+                    <span>Cancel</span>
                 </a>
-
-                ({{ book.bookinstance_set.all.count }})
-            </li>
-
-        {% endfor %}
-
-    </ul>
-
-{% else %}
-
-    <p>
-        Are you sure you want to delete the author?
-    </p>
-
-    <form action="" method="POST">
-
-        {% csrf_token %}
-
-        <input
-            type="submit"
-            value="Yes, delete."
-        >
-
-    </form>
-
-{% endif %}
+            </div>
+        </form>
+    {% endif %}
+</div>
 
 {% endblock %}

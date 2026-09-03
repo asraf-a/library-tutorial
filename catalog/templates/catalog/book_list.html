@@ -2,28 +2,102 @@
 
 {% block content %}
 
-<h1>Book List</h1>
+<div class="page-header-actions">
+    <div>
+        <div class="page-badge">
+            <i class="bi bi-journal-richtext"></i>
+            <span>Library Catalog</span>
+        </div>
+        <h1 class="mt-2 mb-0">All Books</h1>
+    </div>
+    {% if perms.catalog.add_book %}
+        <a href="{% url 'book-create' %}" class="btn-primary-custom text-decoration-none">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add New Book</span>
+        </a>
+    {% endif %}
+</div>
 
 {% if book_list %}
 
-<ul>
+    <div class="item-card-grid">
+        {% for book in book_list %}
+            <div class="item-card">
+                <div class="d-flex align-items-start gap-3 mb-2">
+                    <div class="stat-icon indigo" style="width:42px;height:42px;font-size:1.15rem;border-radius:10px;">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <a href="{{ book.get_absolute_url }}" class="item-card-title d-block">
+                            {{ book.title }}
+                        </a>
+                        <div class="item-card-sub mb-0">
+                            {% if book.author %}
+                                <span>by </span>
+                                <a href="{{ book.author.get_absolute_url }}" class="text-decoration-none text-muted fw-semibold">
+                                    {{ book.author }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Author Unknown</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
-    {% for book in book_list %}
+                {% if book.summary %}
+                    <p class="text-muted small mt-2 mb-3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                        {{ book.summary }}
+                    </p>
+                {% endif %}
 
-    <li>
-        <a href="{{ book.get_absolute_url }}">
-            {{ book.title }}
-        </a>
-        ({{ book.author }})
-    </li>
+                <div class="item-card-meta">
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for genre in book.genre.all|slice:":2" %}
+                            <span class="tag-genre">{{ genre.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ book.get_absolute_url }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                        <span>Details</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
-    {% endfor %}
-
-</ul>
+    {% if is_paginated %}
+        <div class="pagination-container">
+            {% if page_obj.has_previous %}
+                <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            {% endif %}
+            <span class="pagination-step">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="{{ request.path }}?page={{ page_obj.next_page_number }}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
 
 {% else %}
 
-<p>There are no books in the library.</p>
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-journal-x"></i>
+        </div>
+        <h3 class="empty-state-title">No books in the library</h3>
+        <p class="empty-state-text">
+            There are currently no books cataloged in the collection.
+        </p>
+        {% if perms.catalog.add_book %}
+            <a href="{% url 'book-create' %}" class="btn-primary-custom text-decoration-none">
+                <i class="bi bi-plus-lg"></i>
+                <span>Add the first book</span>
+            </a>
+        {% endif %}
+    </div>
 
 {% endif %}
 

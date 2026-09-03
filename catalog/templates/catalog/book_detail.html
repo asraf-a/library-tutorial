@@ -2,83 +2,186 @@
 
 {% block content %}
 
-<h1>
-    {{ book.title }}
-</h1>
-
-<p>
-    <strong>Author:</strong>
-
-    <a href="{{ book.author.get_absolute_url }}">
-        {{ book.author }}
-    </a>
-</p>
-
-<p>
-    <strong>Summary:</strong>
-    {{ book.summary }}
-</p>
-
-<p>
-    <strong>ISBN:</strong>
-    {{ book.isbn }}
-</p>
-
-<p>
-    <strong>Language:</strong>
-    {{ book.language }}
-</p>
-
-<p>
-    <strong>Genre:</strong>
-
-    {% for genre in book.genre.all %}
-
-        {{ genre.name }}
-
-        {% if not forloop.last %}
-            ,
-        {% endif %}
-
-    {% endfor %}
-
-</p>
-
-{% endblock %}
-
-
-{% block sidebar %}
-
-    {{ block.super }}
+<div class="page-header-actions">
+    <div>
+        <a href="{% url 'books' %}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> Back to Books
+        </a>
+        <h1 class="mb-1">{{ book.title }}</h1>
+        <p class="text-muted mb-0">
+            By 
+            {% if book.author %}
+                <a href="{{ book.author.get_absolute_url }}" class="fw-semibold text-primary text-decoration-none">
+                    {{ book.author }}
+                </a>
+            {% else %}
+                <span class="text-muted">Unknown Author</span>
+            {% endif %}
+        </p>
+    </div>
 
     {% if perms.catalog.change_book or perms.catalog.delete_book %}
-
-        <hr>
-
-        <ul class="sidebar-nav">
-
+        <div class="d-flex align-items-center gap-2">
             {% if perms.catalog.change_book %}
-
-                <li>
-                    <a href="{% url 'book-update' book.id %}">
-                        Update book
-                    </a>
-                </li>
-
+                <a href="{% url 'book-update' book.id %}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-pencil"></i>
+                    <span>Edit Book</span>
+                </a>
             {% endif %}
 
             {% if perms.catalog.delete_book %}
+                <a href="{% url 'book-delete' book.id %}" class="btn-danger-custom btn-sm-custom text-decoration-none">
+                    <i class="bi bi-trash"></i>
+                    <span>Delete Book</span>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
 
+<div class="row g-4">
+    <!-- Main Details Column -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <h3 class="content-card-title mb-3">
+                <i class="bi bi-card-text text-primary me-2"></i>Summary
+            </h3>
+            <p class="mb-0" style="line-height:1.75;">
+                {{ book.summary|default:"No summary available for this book." }}
+            </p>
+        </div>
+
+        <!-- Copies / Instances Section -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h3 class="content-card-title">
+                    <i class="bi bi-stack text-primary me-2"></i>Copies in Circulation
+                </h3>
+                <span class="badge bg-light text-dark border">
+                    {{ book.bookinstance_set.all.count }} total
+                </span>
+            </div>
+
+            {% if book.bookinstance_set.all %}
+                <div class="d-flex flex-direction-column gap-3">
+                    {% for copy in book.bookinstance_set.all %}
+                        <div class="p-3 rounded-3 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    {% if copy.status == 'a' %}
+                                        <span class="badge-custom badge-status-a">
+                                            <i class="bi bi-check-circle"></i> Available
+                                        </span>
+                                    {% elif copy.status == 'm' %}
+                                        <span class="badge-custom badge-status-m">
+                                            <i class="bi bi-tools"></i> Maintenance
+                                        </span>
+                                    {% elif copy.status == 'o' %}
+                                        <span class="badge-custom badge-status-o">
+                                            <i class="bi bi-clock"></i> On loan
+                                        </span>
+                                    {% elif copy.status == 'r' %}
+                                        <span class="badge-custom badge-status-r">
+                                            <i class="bi bi-bookmark"></i> Reserved
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-custom badge-status-m">{{ copy.get_status_display }}</span>
+                                    {% endif %}
+
+                                    {% if copy.is_overdue %}
+                                        <span class="badge-custom badge-overdue">
+                                            <i class="bi bi-exclamation-triangle"></i> Overdue
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="text-muted small mt-1">
+                                    <strong>Imprint:</strong> {{ copy.imprint|default:"Standard Edition" }}
+                                </div>
+                                {% if copy.status != 'a' and copy.due_back %}
+                                    <div class="small mt-1 {% if copy.is_overdue %}text-danger fw-semibold{% else %}text-muted{% endif %}">
+                                        <strong>Due back:</strong> {{ copy.due_back }}
+                                    </div>
+                                {% endif %}
+                                <div class="text-muted small font-monospace mt-1">
+                                    ID: {{ copy.id }}
+                                </div>
+                            </div>
+
+                            {% if perms.catalog.can_mark_returned and copy.status == 'o' %}
+                                <div>
+                                    <a href="{% url 'renew-book-librarian' copy.id %}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                                        <i class="bi bi-arrow-repeat"></i> Renew
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">There are no copies of this book in the library.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metadata Sidebar Column -->
+    <div class="col-lg-4">
+        <div class="content-card">
+            <h3 class="content-card-title mb-3">
+                <i class="bi bi-info-circle text-primary me-2"></i>Book Information
+            </h3>
+
+            <div class="detail-meta-list">
+                <div class="detail-meta-item">
+                    <span class="detail-meta-label">ISBN</span>
+                    <span class="font-monospace fw-semibold">{{ book.isbn }}</span>
+                </div>
+
+                <div class="detail-meta-item">
+                    <span class="detail-meta-label">Language</span>
+                    <span>{{ book.language|default:"Not specified" }}</span>
+                </div>
+
+                <div class="detail-meta-item flex-column align-items-start gap-1">
+                    <span class="detail-meta-label">Genres</span>
+                    <div>
+                        {% for genre in book.genre.all %}
+                            <span class="tag-genre">{{ genre.name }}</span>
+                        {% empty %}
+                            <span class="text-muted small">None</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+    {{ block.super }}
+
+    {% if perms.catalog.change_book or perms.catalog.delete_book %}
+        <div class="sidebar-section-title">Manage This Book</div>
+        <ul class="sidebar-nav">
+            {% if perms.catalog.change_book %}
                 <li>
-                    <a href="{% url 'book-delete' book.id %}">
-                        Delete book
+                    <a href="{% url 'book-update' book.id %}">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Update book</span>
                     </a>
                 </li>
-
             {% endif %}
 
+            {% if perms.catalog.delete_book %}
+                <li>
+                    <a href="{% url 'book-delete' book.id %}">
+                        <i class="bi bi-trash3 text-danger"></i>
+                        <span class="text-danger">Delete book</span>
+                    </a>
+                </li>
+            {% endif %}
         </ul>
-
     {% endif %}
-
 {% endblock %}

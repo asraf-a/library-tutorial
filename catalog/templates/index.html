@@ -2,38 +2,122 @@
 
 {% block content %}
 
-  <h1>Local Library Home</h1>
+<!-- Hero Banner -->
+<div class="hero-card">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <h1 class="hero-title">Welcome to LocalLibrary</h1>
+            <p class="hero-subtitle">
+                Explore our curated digital repository of literature, research publications, and author collections. A project developed with Mozilla Developer Network.
+            </p>
+        </div>
+        <div class="visit-badge">
+            <i class="bi bi-eye"></i>
+            <span>Visited {{ num_visits }} time{{ num_visits|pluralize }}</span>
+        </div>
+    </div>
+</div>
 
-  <p>
-    Welcome to LocalLibrary, a website developed by
-    <em>Mozilla Developer Network</em>!
-  </p>
+<!-- Dynamic KPI Statistics -->
+<div class="page-header mb-3">
+    <div class="page-badge">
+        <i class="bi bi-graph-up-arrow"></i>
+        <span>Live Library Overview</span>
+    </div>
+    <h2>Collection Statistics</h2>
+</div>
 
-  <h2>Dynamic content</h2>
+<div class="stats-grid">
+    <!-- Books Metric -->
+    <div class="stat-card">
+        <div class="stat-icon indigo">
+            <i class="bi bi-journal-bookmark-fill"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ num_books }}</span>
+            <span class="stat-label">Total Books</span>
+        </div>
+    </div>
 
-  <p>The library has the following record counts:</p>
+    <!-- Copies Metric -->
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="bi bi-stack"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ num_instances }}</span>
+            <span class="stat-label">Total Copies</span>
+        </div>
+    </div>
 
-  <ul>
-    <li>
-      <strong>Books:</strong> {{ num_books }}
-    </li>
+    <!-- Available Copies Metric -->
+    <div class="stat-card">
+        <div class="stat-icon emerald">
+            <i class="bi bi-check2-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ num_instances_available }}</span>
+            <span class="stat-label">Copies Available</span>
+        </div>
+    </div>
 
-    <li>
-      <strong>Copies:</strong> {{ num_instances }}
-    </li>
+    <!-- Authors Metric -->
+    <div class="stat-card">
+        <div class="stat-icon amber">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ num_authors }}</span>
+            <span class="stat-label">Registered Authors</span>
+        </div>
+    </div>
+</div>
 
-    <li>
-      <strong>Copies available:</strong> {{ num_instances_available }}
-    </li>
+<!-- Quick Explore Section -->
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="content-card h-100 d-flex flex-direction-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="stat-icon indigo" style="width:40px;height:40px;font-size:1.1rem;">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h3 class="content-card-title">Browse Library Catalog</h3>
+                </div>
+                <p class="text-muted small">
+                    Dive into our full catalog of fiction, non-fiction, scientific journals, and classic literature available for checkout.
+                </p>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'books' %}" class="btn-primary-custom btn-sm-custom text-decoration-none">
+                    <span>View All Books</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 
-    <li>
-      <strong>Authors:</strong> {{ num_authors }}
-    </li>
-  </ul>
-
-
-<p>
-    You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.
-</p>
+    <div class="col-md-6">
+        <div class="content-card h-100 d-flex flex-direction-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="stat-icon amber" style="width:40px;height:40px;font-size:1.1rem;">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <h3 class="content-card-title">Discover Authors</h3>
+                </div>
+                <p class="text-muted small">
+                    Learn about renowned writers, view their biographies, and explore their complete published bibliographies.
+                </p>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'authors' %}" class="btn-secondary-custom btn-sm-custom text-decoration-none">
+                    <span>View All Authors</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
